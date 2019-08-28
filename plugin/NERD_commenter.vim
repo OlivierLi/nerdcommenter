@@ -3026,6 +3026,35 @@ endfunction
 " Section: Comment mapping and menu item setup {{{1
 " ===========================================================================
 
+function MergeUp()
+    let currentline = line('.')
+    let isCommented = s:IsCommentedNormOrSexy(currentline)
+
+    if isCommented
+        call s:UncommentLines(currentline+1, currentline+1)
+    endif
+
+    normal! J
+endfunction
+
+function SplitDown()
+    let currentline = line('.')
+    let isCommented = s:IsCommentedNormOrSexy(currentline)
+
+    " Split the line in two parts separated by newline. Insert an "A" that will be replaced 
+    " by a space later. We cannot insert the space right now because of auto-indent.
+    s/^\(\s*\)\(.\{-}\)\(\s*\)\(\%#\)\(\s*\)\(.*\)/\1\2\r\1\4\A\6
+    call histdel("/", -1)
+
+    if isCommented
+        call s:CommentLinesToggle(0, currentline+1, currentline+1)
+        s/A/ /
+    else
+        s/A//
+    endif
+
+endfunction
+
 " Create menu items for the specified modes.  If a:combo is not empty, then
 " also define mappings and show a:combo in the menu items.
 function! s:CreateMaps(modes, target, desc, combo)
